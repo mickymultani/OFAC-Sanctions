@@ -1,9 +1,9 @@
+
 name: Process XML and Generate Text File
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -23,19 +23,21 @@ jobs:
       run: |
         curl -O https://www.treasury.gov/ofac/downloads/sanctions/1.0/sdn_advanced.xml
 
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
     - name: Run Python script
       run: |
         mkdir -p "Sanctioned Addresses"
         python process_xml.py ETH -f TXT -path "./Sanctioned Addresses"
 
-    - name: Commit and push if it's not a pull request
-      if: github.event_name != 'pull_request' 
+    - name: Commit and push if it changed
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add .
-        git commit -m "Add changes" -a
-        git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}
-        git push
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update data"; git push)
       env:
-        GH_PAT: ${{ secrets.RED_FLAG }}
+        RED_FLAG: ${{ secrets.RED_FLAG }}
