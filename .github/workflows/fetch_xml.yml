@@ -1,37 +1,36 @@
-name: Fetch XML
+name: Fetch and Process XML
 
-on:
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
-  fetch_xml:
+  fetch_and_process:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Check out code
       uses: actions/checkout@v2
       with:
-        token: ${{ secrets.red_flag }}
+        token: ${{ secrets.RED_FLAG }}  # Personal access token
 
-    - name: Set up Python 3.8
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: '3.x'
 
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests
+      run: pip install requests
 
     - name: Fetch XML
       run: python fetch_xml.py
 
-    - name: Commit and push if it changed
+    - name: Add changes to Git
       run: |
-        git diff
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
-        git commit -am "Download XML file" || exit 0
-        git push
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add sdn_advanced.xml
+
+    - name: Commit changes
+      run: git commit -m "Add fetched XML file"
+
+    - name: Push changes
+      run: git push
