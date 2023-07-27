@@ -1,14 +1,17 @@
-name: Fetch XML and Run Python Scripts
+name: Download XML and Process
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
@@ -20,6 +23,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
 
-    - name: Fetch XML and Run Python Script
+    - name: Download XML and Run Python Script
       run: |
         python fetch_and_process.py
+
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Add output file" -a
+        git push
