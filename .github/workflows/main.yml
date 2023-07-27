@@ -1,4 +1,4 @@
-name: Download XML and Process
+name: Fetch and Process XML
 
 on:
   push:
@@ -6,12 +6,14 @@ on:
       - main
 
 jobs:
-  build:
+  fetch_and_process:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.red_flag }}
 
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
@@ -23,14 +25,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
 
-    - name: Download XML and Run Python Script
-      run: |
-        python fetch_and_process.py
+    - name: Fetch XML and Run Python Script
+      run: python fetch_and_process.py
 
-    - name: Commit and push changes
+    - name: Commit and push if it changed
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git commit -m "Add output file" -a
+        git diff
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+        git commit -am "Add output file" || exit 0
         git push
