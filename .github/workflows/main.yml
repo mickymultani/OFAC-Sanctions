@@ -1,8 +1,6 @@
-name: Fetch XML and Run Python Scripts
+name: Fetch XML and Run Python Script
 
-on:
-  schedule:
-    - cron: '0 0 * * *' # This will run the job every day at midnight
+on: [push]
 
 jobs:
   build:
