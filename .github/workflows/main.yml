@@ -22,6 +22,10 @@ jobs:
       run: |
         curl -O https://www.treasury.gov/ofac/downloads/sanctions/1.0/sdn_advanced.xml
 
+    - name: Create output directory
+      run: |
+        mkdir -p Sanctioned\ Addresses
+
     - name: Run Python script
       run: |
         python process_xml.py ETH -f TXT -path ./Sanctioned\ Addresses
