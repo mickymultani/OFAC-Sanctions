@@ -1,45 +1,48 @@
-name: Fetch and Process XML
+name: Generate Sanctioned Address List
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  fetch_and_process:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out code
+    - name: Checkout code
       uses: actions/checkout@v2
-      with:
-        persist-credentials: false
-        fetch-depth: 0
 
-    - name: Set up Python
+    - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: 3.9
 
     - name: Install dependencies
-      run: pip install requests
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
 
-    - name: Fetch XML
-      run: python fetch_xml.py
+    - name: Download XML file
+      run: |
+        import requests
+        url = 'https://www.treasury.gov/ofac/downloads/sanctions/1.0/sdn_advanced.xml'
+        response = requests.get(url)
+        with open('sdn_advanced.xml', 'w') as file:
+            file.write(response.text)
+      shell: python
 
-    - name: Process XML and Generate TXT
-      run: python process_xml.py ETH -f TXT -path ./
+    - name: Create Directory
+      run: mkdir "Sanctioned Addresses"
 
-    - name: Add changes to Git
+    - name: Run Python script
+      run: python process_xml.py ETH -f TXT -path ./Sanctioned\ Addresses/
+
+    - name: Commit and push if it's not a pull request
+      if: github.event_name != 'pull_request' 
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add sdn_advanced.xml sanctioned_addresses_ETH.txt
-
-    - name: Commit changes
-      run: git commit -m "Add fetched XML file and processed TXT file"
-
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.RED_FLAG }}
+        git add .
+        git commit -m "Add changes" -a
+        git push
