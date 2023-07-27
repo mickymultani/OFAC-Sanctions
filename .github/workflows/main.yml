@@ -35,4 +35,4 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add .
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update data"; git push https://${{ secrets.RED_FLAG }}@github.com/${{ github.repository }}.git)
+        git diff --quiet && git diff --staged --quiet || (echo ${{ secrets.RED_FLAG }} | git commit -m "Update data"; git push)
