@@ -1,4 +1,4 @@
-name: Fetch XML and Run Python Script
+name: Fetch XML and Run Python Scripts
 
 on:
   schedule:
