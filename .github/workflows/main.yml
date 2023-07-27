@@ -1,0 +1,45 @@
+name: Fetch and Process XML
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch_and_process:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install requests
+
+    - name: Fetch XML
+      run: python fetch_xml.py
+
+    - name: Process XML and Generate TXT
+      run: python process_xml.py ETH -f TXT -path ./
+
+    - name: Add changes to Git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add sdn_advanced.xml sanctioned_addresses_ETH.txt
+
+    - name: Commit changes
+      run: git commit -m "Add fetched XML file and processed TXT file"
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.RED_FLAG }}
