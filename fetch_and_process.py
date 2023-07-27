@@ -5,13 +5,14 @@ import os
 def download_xml_and_run_script():
     url = 'https://www.treasury.gov/ofac/downloads/sanctions/1.0/sdn_advanced.xml'
     response = requests.get(url)
-    with open('sdn_advanced.xml', 'w') as file:
+    
+    # Define the path where you want to download the XML file
+    xml_file_path = os.path.join(os.getcwd(), 'sdn_advanced.xml')
+
+    with open(xml_file_path, 'w') as file:
         file.write(response.text)
 
-    # Get the current working directory
-    cwd = os.getcwd()
-
     # Call your script here
-    subprocess.call(["python", "process_xml.py", "--output-path", cwd, "sdn_advanced.xml"])
+    subprocess.call(["python", "process_xml.py", "-sdn", xml_file_path, "--output-path", os.getcwd()])
 
 download_xml_and_run_script()
